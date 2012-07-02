@@ -9,6 +9,7 @@
 
 @interface NNAlertView (Private)
 - (void)hide;
+- (void)needsLayoutWithAnimation:(BOOL)animate;
 @end
 
 @implementation NNAlertView
@@ -102,12 +103,18 @@ static UIFont *buttonFont = nil;
 		
 		_vignetteBackground = NO;
 		self.delegate = _delegate;
+
+        [[NSNotificationCenter defaultCenter] addObserver:self
+                                                 selector:@selector(needsLayout)
+                                                     name:UIApplicationDidChangeStatusBarOrientationNotification
+                                                   object:nil];
 	}
 
 	return self;
 }
 
 - (void)dealloc {
+	[[NSNotificationCenter defaultCenter] removeObserver:self];
     [_backgroundImage release];
     [_view release];
 	[allButtons release];
@@ -243,6 +250,7 @@ static UIFont *buttonFont = nil;
     __block CGPoint center = _view.center;
     center.y = floorf([BlockBackground sharedInstance].bounds.size.height * 0.5) + kAlertViewBounce;
     
+	[self needsLayoutWithAnimation:NO];
     [UIView animateWithDuration:0.3
                           delay:0.0
                         options:UIViewAnimationCurveEaseOut
@@ -269,6 +277,34 @@ static UIFont *buttonFont = nil;
 - (void)buttonClicked:(id)sender {
 	[self hide];
 	[delegate nnAlertView:self didDismissWithButtonIndex:[sender tag]];
+}
+
+- (void)needsLayout {
+	[self needsLayoutWithAnimation:YES];
+}
+
+- (void)needsLayoutWithAnimation:(BOOL)animate {
+	float angle = 0.0f;
+	for (UIWindow *window in [[UIApplication sharedApplication] windows])
+		for (UIView *view in [window subviews]) {
+			UIViewController *vc = (UIViewController *)view.nextResponder;
+			if (vc.interfaceOrientation == UIInterfaceOrientationLandscapeLeft)
+				angle = 270.0f;
+			else if (vc.interfaceOrientation == UIInterfaceOrientationLandscapeRight)
+				angle = 90.0f;
+			else if (vc.interfaceOrientation == UIInterfaceOrientationPortraitUpsideDown)
+				angle = 180.0f;
+			else
+				angle = 0.0f;
+		}
+	
+	if (animate) {
+		[UIView beginAnimations:nil context:NULL];
+		[UIView setAnimationDuration:0.3f];
+	}
+	_view.transform = CGAffineTransformMakeRotation((angle * M_PI) / 180.0);
+	if (animate)
+		[UIView commitAnimations];
 }
 
 - (void)hide {
