@@ -9,6 +9,7 @@
 
 @interface NNAlertView (Private)
 - (void)hide;
+- (void)needsLayout;
 - (void)needsLayoutWithAnimation:(BOOL)animate;
 @end
 
@@ -285,18 +286,15 @@ static UIFont *buttonFont = nil;
 
 - (void)needsLayoutWithAnimation:(BOOL)animate {
 	float angle = 0.0f;
-	for (UIWindow *window in [[UIApplication sharedApplication] windows])
-		for (UIView *view in [window subviews]) {
-			UIViewController *vc = (UIViewController *)view.nextResponder;
-			if (vc.interfaceOrientation == UIInterfaceOrientationLandscapeLeft)
-				angle = 270.0f;
-			else if (vc.interfaceOrientation == UIInterfaceOrientationLandscapeRight)
-				angle = 90.0f;
-			else if (vc.interfaceOrientation == UIInterfaceOrientationPortraitUpsideDown)
-				angle = 180.0f;
-			else
-				angle = 0.0f;
-		}
+	UIInterfaceOrientation orientation = [[UIApplication sharedApplication] statusBarOrientation];
+	if (orientation == UIInterfaceOrientationLandscapeLeft)
+		angle = 270.0f;
+	else if (orientation == UIInterfaceOrientationLandscapeRight)
+		angle = 90.0f;
+	else if (orientation == UIInterfaceOrientationPortraitUpsideDown)
+		angle = 180.0f;
+	else
+		angle = 0.0f;
 	
 	if (animate) {
 		[UIView beginAnimations:nil context:NULL];
