@@ -249,30 +249,50 @@ static UIFont *buttonFont = nil;
     [[BlockBackground sharedInstance] addToMainWindow:_view];
 
     __block CGPoint center = _view.center;
-    center.y = floorf([BlockBackground sharedInstance].bounds.size.height * 0.5) + kAlertViewBounce;
+    center.y = floorf([BlockBackground sharedInstance].bounds.size.height * 0.5);
+	_view.center = center;
+	[BlockBackground sharedInstance].alpha = 1.0f;
     
+	// Show with bounce animation
 	[self needsLayoutWithAnimation:NO];
-    [UIView animateWithDuration:0.3
-                          delay:0.0
-                        options:UIViewAnimationCurveEaseOut
-                     animations:^{
-                         [BlockBackground sharedInstance].alpha = 1.0f;
-                         _view.center = center;
-                     } 
-                     completion:^(BOOL finished) {
-                         [UIView animateWithDuration:0.1
-                                               delay:0.0
-                                             options:0
-                                          animations:^{
-                                              center.y -= kAlertViewBounce;
-                                              _view.center = center;
-                                          } 
-                                          completion:^(BOOL finished) {
-                                              [[NSNotificationCenter defaultCenter] postNotificationName:@"AlertViewFinishedAnimations" object:nil];
-                                          }];
-                     }];
+	CGAffineTransform transform = _view.transform;
+	_view.transform = CGAffineTransformScale(transform, 0.5, 0.5);
+	[UIView animateWithDuration:0.1
+					 animations:^{
+						 _view.transform = CGAffineTransformScale(transform, 1.1, 1.1);
+					 }
+					 completion:^(BOOL finished) {
+						 [UIView animateWithDuration:0.1
+										  animations:
+						  ^{
+							  _view.transform = CGAffineTransformScale(transform, 0.9, 0.9);
+						  }
+										  completion:^(BOOL finished)
+						 {
+							 [UIView animateWithDuration:0.1
+											  animations:
+							  ^{
+								  _view.transform = CGAffineTransformScale(transform, 1.0, 1.0);
+							  }
+											  completion:^(BOOL finished) {}];
+						 }];
+					 }];
     
     [self retain];
+}
+
+- (void)hide {
+	[UIView animateWithDuration:0.1
+						  delay:0.0f
+						options:0
+					 animations:^{
+						 [[BlockBackground sharedInstance] reduceAlphaIfEmpty];
+					 }
+					 completion:^(BOOL finished) {
+						 [[BlockBackground sharedInstance] removeView:_view];
+						 [_view release]; _view = nil;
+						 [self autorelease];
+					 }];
 }
 
 - (void)buttonClicked:(id)sender {
@@ -303,33 +323,6 @@ static UIFont *buttonFont = nil;
 	_view.transform = CGAffineTransformMakeRotation((angle * M_PI) / 180.0);
 	if (animate)
 		[UIView commitAnimations];
-}
-
-- (void)hide {
-	[UIView animateWithDuration:0.1
-						  delay:0.0
-						options:0
-					 animations:^{
-						 CGPoint center = _view.center;
-						 center.y += 20;
-						 _view.center = center;
-					 } 
-					 completion:^(BOOL finished) {
-						 [UIView animateWithDuration:0.3
-											   delay:0.0
-											 options:UIViewAnimationCurveEaseIn
-										  animations:^{
-											  CGRect frame = _view.frame;
-											  frame.origin.y = -frame.size.height;
-											  _view.frame = frame;
-											  [[BlockBackground sharedInstance] reduceAlphaIfEmpty];
-										  } 
-										  completion:^(BOOL finished) {
-											  [[BlockBackground sharedInstance] removeView:_view];
-											  [_view release]; _view = nil;
-											  [self autorelease];
-										  }];
-					 }];
 }
 
 @end
