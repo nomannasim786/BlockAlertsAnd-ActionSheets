@@ -295,6 +295,24 @@ static UIFont *buttonFont = nil;
 					 }];
 }
 
+- (void)moveUpwards {
+    __block CGPoint center = _view.center;
+    center.y = floorf([BlockBackground sharedInstance].bounds.size.height * 0.5) - 100;
+	[UIView beginAnimations:nil context:NULL];
+	[UIView setAnimationDuration:0.3f];
+	_view.center = center;
+	[UIView commitAnimations];
+}
+
+- (void)moveToDefaultPosition {
+    __block CGPoint center = _view.center;
+    center.y = floorf([BlockBackground sharedInstance].bounds.size.height * 0.5) - 100;
+	[UIView beginAnimations:nil context:NULL];
+	[UIView setAnimationDuration:0.3f];
+	_view.center = center;
+	[UIView commitAnimations];
+}
+
 - (void)buttonClicked:(id)sender {
 	[self hide];
 	[delegate nnAlertView:self didDismissWithButtonIndex:[sender tag]];

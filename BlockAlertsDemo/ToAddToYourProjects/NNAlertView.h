@@ -19,6 +19,8 @@
 
 - (id)initWithTitle:(NSString *)title message:(NSString *)message delegate:(id)_delegate cancelButtonTitle:(NSString *)cancelButtonTitle destructiveButtonTitle:(NSString *)destructiveButtonTitle otherButtonTitles:(NSString *)otherButtonTitles, ... NS_REQUIRES_NIL_TERMINATION;
 - (void)show;
+- (void)moveUpwards;
+- (void)moveToDefaultPosition;
 @end
 
 @protocol NNAlertViewDelegate
