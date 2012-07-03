@@ -314,8 +314,8 @@ static UIFont *buttonFont = nil;
 }
 
 - (void)buttonClicked:(id)sender {
-	[self hide];
 	[delegate nnAlertView:self didDismissWithButtonIndex:[sender tag]];
+	[self hide];
 }
 
 - (void)needsLayout {
